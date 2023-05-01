@@ -12,4 +12,5 @@
  Project Ongoing<br>
  V0.02 - 74HC595 working
  <br><br>
-![IMG_20230430_154700](https://user-images.githubusercontent.com/30392727/235519799-c9c39eb0-3818-4354-830d-be152f640272.jpg)
+
+![IMG_20230430_154700](https://user-images.githubusercontent.com/30392727/235520841-97577d07-767d-45c1-9d22-24d55d553020.jpg)
