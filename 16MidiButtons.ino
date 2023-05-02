@@ -2,12 +2,12 @@
 //                      16 Buttons Midi Controler
 // ----------------------------------------------------------------------------
 //
+// V 0.04 test SSD1306     - ok
 // V 0.03 test 74HC165 Lib - ok
 // V 0.02 test 74HC595 Lib - ok
 //
 // (C) 2023 under GNU Licence  - F.Lafforgue
 // ----------------------------------------------------------------------------
-
 
 // D0       I2  Rx 
 // D1       I3  Tx
@@ -45,17 +45,43 @@
 
 // ----------------------------------------------------------------------------
 
+#include <Wire.h>
+#include <EEPROM.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define OLedWidth     128
+#define OLedHight      64
+#define OLedReset      -1
+#define OLedAdr      0x3C
+
+Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
+
 #include "Lib_74HC595.h"
 #include "Lib_74HC165.h"
 
-// ----------------------------------------------------------------------------
+// ============================================================================
+//                          I N I T I A L I Z A T I O N
+// ============================================================================
 
 void setup() {
+  Serial.begin(115200);
+  
   L595Init();
   L165Init();
+
+  if(!OLed.begin(SSD1306_SWITCHCAPVCC, OLedAdr)) {
+    Serial.println(F("SSD1306 Error"));
+  } else {
+    Serial.println(F("SSD1306 Initialized"));
+  }
+  OLed.display();  // display adafruit logo
+  delay(2000);  
 }
 
-// ----------------------------------------------------------------------------
+// ============================================================================
+//                           M A I N    L O O P
+// ============================================================================
 
 unsigned int BtnStatus =1;
 unsigned int oBtnStatus=0;
