@@ -14,8 +14,8 @@
 
 #ifndef CLK165
   #define CLK165        10
-  #define LATCH165       7
-  #define DIN165         6
+  #define LATCH165       6
+  #define DIN165         5
 #endif
 
 #define MSBFIRST165
@@ -39,10 +39,9 @@ byte L165ReadOneByte() {
 	// MSBFIRST
 	temp = temp | ( digitalRead(DIN165) << ( 7-i) );
     // LSBFIRST
-//	temp = temp | ( digitalRead(DIN165) << i );
+    // temp = temp | ( digitalRead(DIN165) << i );
 
 	digitalWrite(CLK165  , HIGH ); // Pulse
-//  delay(5);
 	digitalWrite(CLK165  , LOW );
   }
   digitalWrite(LATCH165,LOW);
@@ -50,20 +49,26 @@ byte L165ReadOneByte() {
 }
 
 unsigned int L165ReadOneWord( ) {
+  byte temp0=0;
+  byte temp1=0;
   unsigned int temp=0;
   
   digitalWrite(LATCH165,HIGH);
-  for ( byte i=0; i<16; i++ ) {
-	// MSBFIRST
-	temp = temp | ( digitalRead(DIN165) << ( 15-i) );
-    // LSBFIRST
-//	temp = temp | ( digitalRead(DIN165) << i );
-	digitalWrite(CLK165  , HIGH ); // Pulse
-//  delay(5);
-	digitalWrite(CLK165  , LOW );
+  for ( byte i=0; i<8; i++ ) {
+	  // MSBFIRST
+	  temp0 = temp0 | ( digitalRead(DIN165) << ( 7-i) );
+	  digitalWrite(CLK165  , HIGH ); // Pulse
+	  digitalWrite(CLK165  , LOW );
   }
+  for ( byte i=0; i<8; i++ ) {
+    // MSBFIRST
+    temp1 = temp1 | ( digitalRead(DIN165) << ( 7-i) );
+    digitalWrite(CLK165  , HIGH ); // Pulse
+    digitalWrite(CLK165  , LOW );
+  }
+  
   digitalWrite(LATCH165,LOW);
-  return temp;
+  return temp0 | ( temp1 << 8 );
 }
 
 #endif
