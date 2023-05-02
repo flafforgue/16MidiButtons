@@ -55,10 +55,10 @@ unsigned int L165ReadOneWord( ) {
   
   digitalWrite(LATCH165,HIGH);
   for ( byte i=0; i<8; i++ ) {
-	  // MSBFIRST
-	  temp0 = temp0 | ( digitalRead(DIN165) << ( 7-i) );
-	  digitalWrite(CLK165  , HIGH ); // Pulse
-	  digitalWrite(CLK165  , LOW );
+    // MSBFIRST
+    temp0 = temp0 | ( digitalRead(DIN165) << ( 7-i) );
+    digitalWrite(CLK165  , HIGH ); // Pulse
+    digitalWrite(CLK165  , LOW );
   }
   for ( byte i=0; i<8; i++ ) {
     // MSBFIRST
