@@ -2,6 +2,7 @@
 //                      16 Buttons Midi Controler
 // ----------------------------------------------------------------------------
 //
+// V 0.10 setup
 // V 0.06 Test menus       - ok
 // V 0.05 test Encoder     - ok
 // V 0.04 test SSD1306     - ok
@@ -134,10 +135,10 @@ byte readkey() {
 #define MidiCtrlChange B10110000
 #define MidiProgChange B11000000
 
-                      // 16 Butons + 4 Pots
+                        // 16 Butons + 4 Pots
 byte ChnMessage[20] = { B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000, 
                         B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000,                     
-                        B10110000, B10110000, B10110000, B10110000};
+                        B10110000, B10110000, B10110000, B10110000  };
                         
 byte ChnStatus [20] = {  41,  43,  45,  47,     48,  50,  49,  51, 
                          41,  43,  45,  47,     36,  38,  44,  46,
@@ -241,13 +242,24 @@ void DoConfig() {
         }
       }
     }
+
+    if (encodermov != 0 ) {
+      cli();
+      ChnMessage[LastBtnPressed] = ( ChnMessage[LastBtnPressed] & MSGMask ) | ((( ChnMessage[LastBtnPressed] & CHNMask ) + encodermov) & CHNMask );
+      encodermov=0;
+      sei();
+    }
     
     if ( millis() - omillis > 150 ) { // Refresh Display every 150 us
-      TitleMenu(F("Setup "));
-      OLedprint2(LastBtnPressed);
+      TitleMenu(F("Bt "));  
+      OLed.setCursor(36, L1);OLedprint2(LastBtnPressed);
+      OLed.setCursor(68, L1);OLed.print(F("Ch "));  OLedprint2(ChnMessage[LastBtnPressed] & CHNMask);
+      
+//      OLed.setCursor(68, L2); OLedprint2( ChnMessage[LastBtnPressed] & CHNMask );  // chn
       switch ( ChnMessage[LastBtnPressed] & MSGMask ) {
         case MidiModeNote  :
-             OLed.setCursor(4, L2);  OLed.print(F("Note"));
+             OLed.setCursor( 4, L2);  OLed.print(F("Note"));
+             OLed.setCursor(68, L2);  OLedprint4(ChnStatus[LastBtnPressed]);
              break;
         case MidiCtrlChange:
              OLed.setCursor(4, L2);  OLed.print(F("Ctrl"));
