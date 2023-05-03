@@ -226,11 +226,18 @@ byte LastBtnPressed = 0;
 void DoConfig() {
   boolean       LetRunning = true;
   unsigned long omillis    = 0;  
-    
+  byte Edt = 0;
+  
   while ( LetRunning ) {
     ReadBtnState();
-    if ( readkey() == BTN_ENC ) {  // if Select Pressed exit
-      LetRunning=false;
+    switch ( readkey() ) {
+      case BTN_ENC:  
+         Edt++;
+         if ( Edt > 2) { Edt=0; }
+         break; 
+      case BTN_ENC_Long:   
+         LetRunning=false;
+         break;     
     }
 
     BtnStatus=L165ReadOneWord( );
@@ -242,16 +249,34 @@ void DoConfig() {
         }
       }
     }
-
+  
     if (encodermov != 0 ) {
+      switch ( Edt ) {
+         case 0: 
+            ChnMessage[LastBtnPressed] = ( ChnMessage[LastBtnPressed] & MSGMask ) | ((( ChnMessage[LastBtnPressed] & CHNMask ) + encodermov) & CHNMask );
+            break;       
+         case 1: 
+            ChnStatus[LastBtnPressed] = ( ChnStatus[LastBtnPressed] + encodermov ) & B01111111;
+            break; 
+         case 2: 
+            ChnData1[LastBtnPressed] = ( ChnData1[LastBtnPressed] + encodermov ) & B01111111;
+            break;                
+      }
       cli();
-      ChnMessage[LastBtnPressed] = ( ChnMessage[LastBtnPressed] & MSGMask ) | ((( ChnMessage[LastBtnPressed] & CHNMask ) + encodermov) & CHNMask );
       encodermov=0;
       sei();
     }
     
     if ( millis() - omillis > 150 ) { // Refresh Display every 150 us
       TitleMenu(F("Bt "));  
+
+      if ( Edt==0 ) {
+        OLed.fillRect(64,Edt*16, 127, 16, SSD1306_WHITE);  
+      } else {
+        OLed.fillRect( 0,Edt*16, 127, 16, SSD1306_WHITE); 
+      }          
+      OLed.setTextColor(SSD1306_INVERSE);
+      
       OLed.setCursor(36, L1);OLedprint2(LastBtnPressed);
       OLed.setCursor(68, L1);OLed.print(F("Ch "));  OLedprint2(ChnMessage[LastBtnPressed] & CHNMask);
       
@@ -260,6 +285,8 @@ void DoConfig() {
         case MidiModeNote  :
              OLed.setCursor( 4, L2);  OLed.print(F("Note"));
              OLed.setCursor(68, L2);  OLedprint4(ChnStatus[LastBtnPressed]);
+             OLed.setCursor( 4, L3);  OLed.print(F("Vel"));
+             OLed.setCursor(68, L3);  OLedprint4(ChnData1[LastBtnPressed]);
              break;
         case MidiCtrlChange:
              OLed.setCursor(4, L2);  OLed.print(F("Ctrl"));
