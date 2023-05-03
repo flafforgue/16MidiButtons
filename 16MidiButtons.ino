@@ -12,7 +12,7 @@
 // ----------------------------------------------------------------------------
 
 // D0       I2  Rx 
-// D1       I3  Tx
+// D1       I3  Tx        Midi out
 // D2       I1  SDA       SSD1306
 // D3~      I0  SCL       SSD1306
 // D4   A6                RotB
@@ -30,20 +30,20 @@
 // D20  A2                Pot2
 // D21  A3                Pot3
 
-#define CLK595            10
-#define LATCH595          9
-#define DOUT595           8
+#define CLK595             10
+#define LATCH595            9
+#define DOUT595             8
 
-#define CLK165           10
-#define LATCH165          6
-#define DIN165            5
+#define CLK165             10
+#define LATCH165            6
+#define DIN165              5
 
-#define SDA               2
-#define SCL               3
+#define SDA                 2
+#define SCL                 3
 
-#define ROT_A             7
-#define ROT_B             4
-#define BTNEncoder       14
+#define ROT_A               7
+#define ROT_B               4
+#define BTNEncoder         14
 
 // ----------------------------------------------------------------------------
 
@@ -52,19 +52,19 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define OLedWidth     128
-#define OLedHight      64
-#define OLedReset      -1
-#define OLedAdr      0x3C
+#define OLedWidth       128
+#define OLedHight        64
+#define OLedReset        -1
+#define OLedAdr        0x3C
 
 Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
 
 #include "Lib_74HC595.h"
 #include "Lib_74HC165.h"
 
-// -------------------------------------------------------------
-// Rotary Encoder & button
-// -------------------------------------------------------------
+// ----------------------------------------------------------------------------
+//                            Rotary Encoder & button
+// ----------------------------------------------------------------------------
 
 #define BTN_NONE          0
 #define BTN_ENC           1
@@ -72,9 +72,9 @@ Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
 
 #define BTN_LONGDELAY  1000
 
-byte keydown  = BTN_NONE;
-byte key      = BTN_NONE;
-unsigned long   BTNTime;
+byte keydown  =    BTN_NONE;
+byte key      =    BTN_NONE;
+unsigned long      BTNTime;
 
 int  encodermov = 0;
 
@@ -124,14 +124,44 @@ byte readkey() {
 }
 
 // ============================================================================
+//                              Midi
+// ============================================================================
+
+#define MSGMask        B11110000
+#define CHNMask        B00001111
+
+#define MidiModeNote   B10000000
+#define MidiCtrlChange B10110000
+#define MidiProgChange B11000000
+
+                      // 16 Butons + 4 Pots
+byte ChnMessage[20] = { B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000, 
+                        B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000,                     
+                        B10110000, B10110000, B10110000, B10110000};
+                        
+byte ChnStatus [20] = {  41,  43,  45,  47,     48,  50,  49,  51, 
+                         41,  43,  45,  47,     36,  38,  44,  46,
+                          0,   0,   0,   0 }; 
+
+byte ChnData1  [20] = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
+                        127, 127, 127, 127 ,   127, 127, 127, 127 ,
+                        127, 127, 127, 127 };
+
+byte ChnData2  [20] = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
+                        127, 127, 127, 127 ,   127, 127, 127, 127 ,
+                        127, 127, 127, 127 };
+byte ChnData2b [20]; // 
+
+
+// ============================================================================
 //                            M E N U    &   D I S P L A Y
 // ============================================================================
 
-#define L1       0
-#define L2      16
-#define L3      32
-#define L4      48
-#define Lmargin  4
+#define L1                0
+#define L2               16
+#define L3               32
+#define L4               48
+#define Lmargin           4
 
 void TitleMenu(String str) {
   OLed.clearDisplay();
@@ -141,9 +171,24 @@ void TitleMenu(String str) {
   OLed.println(str); 
 }
 
+void OLedprint2 ( int value ) {
+   if (( value ) < 10 ) { OLed.print(F(" ")); }    // finaly not using sprintf , use more size
+   OLed.print(value);
+}
+
+void OLedprint4 ( int value ) {
+   if (( value ) < 1000 ) { OLed.print(F(" ")); }  // finaly not using sprintf , use more size
+   if (( value ) <  100 ) { OLed.print(F(" ")); }   
+   if (( value ) <   10 ) { OLed.print(F(" ")); }
+   OLed.print(value);
+}
+
 // ============================================================================
 //                                    Mode Live
 // ============================================================================
+
+unsigned int BtnStatus =1;
+unsigned int oBtnStatus=0;
 
 void DoLive() {
   boolean       LetRunning = true;
@@ -155,6 +200,12 @@ void DoLive() {
       LetRunning=false;
     }
 
+    BtnStatus=L165ReadOneWord( );
+    if ( BtnStatus != oBtnStatus ) {
+      L595SendOneWord(BtnStatus);
+      oBtnStatus=BtnStatus;
+    }
+    
     if ( millis() - omillis > 150 ) { // Refresh Display every 150 us
       TitleMenu(F("Live"));
       OLed.display();
@@ -165,9 +216,11 @@ void DoLive() {
   ClearEncoder();
 }
 
-// ============================================================================
-//                                    Mode Live
-// ============================================================================
+// ----------------------------------------------------------------------------
+//                                   S E T U P
+// ----------------------------------------------------------------------------
+
+byte LastBtnPressed = 0;
 
 void DoConfig() {
   boolean       LetRunning = true;
@@ -179,8 +232,31 @@ void DoConfig() {
       LetRunning=false;
     }
 
+    BtnStatus=L165ReadOneWord( );
+    if ( BtnStatus != oBtnStatus ) {
+      oBtnStatus=BtnStatus;
+      for (byte i=0;i<16;i++)  {
+        if ( ( BtnStatus >> i ) & 1 == 1 ) {
+          LastBtnPressed=i; 
+        }
+      }
+    }
+    
     if ( millis() - omillis > 150 ) { // Refresh Display every 150 us
-      TitleMenu(F("Setup"));
+      TitleMenu(F("Setup "));
+      OLedprint2(LastBtnPressed);
+      switch ( ChnMessage[LastBtnPressed] & MSGMask ) {
+        case MidiModeNote  :
+             OLed.setCursor(4, L2);  OLed.print(F("Note"));
+             break;
+        case MidiCtrlChange:
+             OLed.setCursor(4, L2);  OLed.print(F("Ctrl"));
+             break;
+        case MidiProgChange:
+             OLed.setCursor(4, L2);  OLed.print(F("Prog"));
+             break;
+      }
+      
       OLed.display();
       omillis = millis();
     }
@@ -188,6 +264,10 @@ void DoConfig() {
 
   ClearEncoder();  
 }
+
+// ----------------------------------------------------------------------------
+//                                     D E M O
+// ----------------------------------------------------------------------------
                
 void DoDemo() {
   boolean       LetRunning = true;
@@ -237,22 +317,13 @@ void setup() {
 }
 
 // ============================================================================
-//                           M A I N    L O O P
+//                             M A I N    L O O P
 // ============================================================================
-
-unsigned int BtnStatus =1;
-unsigned int oBtnStatus=0;
 
 int menu  = 0;
 int omenu = 2;
 
 void loop() {
-
-  BtnStatus=L165ReadOneWord( );
-  if ( BtnStatus != oBtnStatus ) {
-    L595SendOneWord(BtnStatus);
-    oBtnStatus=BtnStatus;
-  }
 
   if (encodermov != 0 ) {
     cli();
