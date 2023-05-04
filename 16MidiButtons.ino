@@ -204,12 +204,18 @@ void OLedprint4 ( int value ) {
 //                                    Mode Live
 // ============================================================================
 
+void ToggleBit(unsigned int *var, unsigned int mask) {
+  *var = *var ^ mask;
+}
+
 unsigned int BtnStatus =1;
 unsigned int oBtnStatus=0;
 
 void DoLive() {
   boolean       LetRunning = true;
   unsigned long omillis    = 0;  
+  unsigned int  BtnChange;
+  unsigned int  Lights     = 0;
     
   while ( LetRunning ) {
     ReadBtnState();
@@ -219,7 +225,22 @@ void DoLive() {
 
     BtnStatus=L165ReadOneWord( );
     if ( BtnStatus != oBtnStatus ) {
-      L595SendOneWord(BtnStatus);
+      BtnChange= oBtnStatus ^ BtnStatus;
+      if ( BtnChange > 0 ) {
+        for (byte i=0;i<16;i++) {
+          unsigned int tmp = BtnChange & ( 1 << i ) ;
+          unsigned int prs = BtnStatus & ( 1 << i ) ;
+          if ( tmp != 0 ) {
+            if ( prs > 0 ) {
+              SendButtonPress(i);
+              Lights = Lights ^ prs;  // for testing toggle bit , so first press light , second switch off  
+            } else {
+              SendButtonRelease(i);
+            }
+          }
+        }
+      }  
+      L595SendOneWord(Lights);
       oBtnStatus=BtnStatus;
     }
     
