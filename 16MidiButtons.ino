@@ -142,11 +142,14 @@ byte ChnMessage[20] = { B10000000, B10000000, B10000000, B10000000,   B10000000,
                         
 byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51, 
                          41,  43,  45,  47,     36,  38,  44,  46,
-                          0,   0,   0,   0 }; 
+                          7,   1,  12,  13 }; 
 
 byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
                         127, 127, 127, 127 ,   127, 127, 127, 127 ,
                         127, 127, 127, 127 };
+
+unsigned int Lights     = 0; // Status of lights
+unsigned int Toggle     = 0; // Define which button is in toggle mode
 
 // ----------------------------------------------------------------------------
 
@@ -208,14 +211,14 @@ void ToggleBit(unsigned int *var, unsigned int mask) {
   *var = *var ^ mask;
 }
 
-unsigned int BtnStatus =1;
-unsigned int oBtnStatus=0;
+unsigned int BtnStatus  = 1;
+unsigned int oBtnStatus = 0;
 
 void DoLive() {
   boolean       LetRunning = true;
   unsigned long omillis    = 0;  
   unsigned int  BtnChange;
-  unsigned int  Lights     = 0;
+
     
   while ( LetRunning ) {
     ReadBtnState();
@@ -225,11 +228,12 @@ void DoLive() {
 
     BtnStatus=L165ReadOneWord( );
     if ( BtnStatus != oBtnStatus ) {
-      BtnChange= oBtnStatus ^ BtnStatus;
+      BtnChange= oBtnStatus ^ BtnStatus; // get button changed
       if ( BtnChange > 0 ) {
         for (byte i=0;i<16;i++) {
           unsigned int tmp = BtnChange & ( 1 << i ) ;
           unsigned int prs = BtnStatus & ( 1 << i ) ;
+          unsigned int tgl = Toggle    & ( 1 << i ) ;
           if ( tmp != 0 ) {
             if ( prs > 0 ) {
               SendButtonPress(i);
@@ -326,10 +330,14 @@ void DoConfig() {
              OLed.setCursor(68, L3);  OLedprint4(ChnData2[LastBtnPressed]);
              break;
         case MidiCtrlChange:
-             OLed.setCursor(4, L2);  OLed.print(F("Ctrl"));
+             OLed.setCursor( 4, L2);  OLed.print(F("Ctrl"));
+             OLed.setCursor(68, L2);  OLedprint4(ChnData1[LastBtnPressed]);
+             OLed.setCursor( 4, L3);  OLed.print(F("Val"));
+             OLed.setCursor(68, L3);  OLedprint4(ChnData2[LastBtnPressed]);
              break;
         case MidiProgChange:
-             OLed.setCursor(4, L2);  OLed.print(F("Prog"));
+             OLed.setCursor( 4, L2);  OLed.print(F("Prog"));
+             OLed.setCursor(68, L2);  OLedprint4(ChnData1[LastBtnPressed]);          
              break;
       }
       
