@@ -140,19 +140,35 @@ byte ChnMessage[20] = { B10000000, B10000000, B10000000, B10000000,   B10000000,
                         B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000,                     
                         B10110000, B10110000, B10110000, B10110000  };
                         
-byte ChnStatus [20] = {  41,  43,  45,  47,     48,  50,  49,  51, 
+byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51, 
                          41,  43,  45,  47,     36,  38,  44,  46,
                           0,   0,   0,   0 }; 
 
-byte ChnData1  [20] = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
+byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
                         127, 127, 127, 127 ,   127, 127, 127, 127 ,
                         127, 127, 127, 127 };
 
-byte ChnData2  [20] = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
-                        127, 127, 127, 127 ,   127, 127, 127, 127 ,
-                        127, 127, 127, 127 };
-byte ChnData2b [20]; // 
+// ----------------------------------------------------------------------------
 
+void SendMidiCmd(byte Msg,byte Data1,byte Data2 ) {
+}
+
+void SendButtonPress(byte Chn ) {
+  byte Msg;
+
+  Msg=ChnMessage[Chn];
+  SendMidiCmd(Msg, ChnData1[Chn], ChnData2[Chn] ); 
+}
+
+void SendButtonRelease(byte Chn ) {
+  byte Msg;
+
+  Msg=ChnMessage[Chn];
+  if (( Msg & MSGMask ) == MidiModeNote ) {
+     Msg = Msg & B11101111; 
+  }
+  SendMidiCmd(Msg, ChnData1[Chn], ChnData2[Chn] ); 
+}
 
 // ============================================================================
 //                            M E N U    &   D I S P L A Y
@@ -256,10 +272,10 @@ void DoConfig() {
             ChnMessage[LastBtnPressed] = ( ChnMessage[LastBtnPressed] & MSGMask ) | ((( ChnMessage[LastBtnPressed] & CHNMask ) + encodermov) & CHNMask );
             break;       
          case 1: 
-            ChnStatus[LastBtnPressed] = ( ChnStatus[LastBtnPressed] + encodermov ) & B01111111;
+            ChnData1[LastBtnPressed] = ( ChnData1[LastBtnPressed] + encodermov ) & B01111111;
             break; 
          case 2: 
-            ChnData1[LastBtnPressed] = ( ChnData1[LastBtnPressed] + encodermov ) & B01111111;
+            ChnData2[LastBtnPressed] = ( ChnData2[LastBtnPressed] + encodermov ) & B01111111;
             break;                
       }
       cli();
@@ -284,9 +300,9 @@ void DoConfig() {
       switch ( ChnMessage[LastBtnPressed] & MSGMask ) {
         case MidiModeNote  :
              OLed.setCursor( 4, L2);  OLed.print(F("Note"));
-             OLed.setCursor(68, L2);  OLedprint4(ChnStatus[LastBtnPressed]);
+             OLed.setCursor(68, L2);  OLedprint4(ChnData1[LastBtnPressed]);
              OLed.setCursor( 4, L3);  OLed.print(F("Vel"));
-             OLed.setCursor(68, L3);  OLedprint4(ChnData1[LastBtnPressed]);
+             OLed.setCursor(68, L3);  OLedprint4(ChnData2[LastBtnPressed]);
              break;
         case MidiCtrlChange:
              OLed.setCursor(4, L2);  OLed.print(F("Ctrl"));
@@ -399,6 +415,5 @@ void loop() {
       }
     }
     omenu=menu+1;  // to force redraw 
-  }  
-  
+  }    
 }
