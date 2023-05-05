@@ -125,7 +125,7 @@ byte readkey() {
 }
 
 // ============================================================================
-//                              Midi
+//                                       Midi
 // ============================================================================
 
 #define MSGMask        B11110000
@@ -136,7 +136,7 @@ byte readkey() {
 #define MidiProgChange B11000000
 
                         // 16 Butons + 4 Pots
-byte ChnMessage[20] = { B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000, 
+byte ChnMessage[20] = { B10000000, B10000000, B10000000, B10110000,   B10000000, B10000000, B10000000, B10000000, 
                         B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000,                     
                         B10110000, B10110000, B10110000, B10110000  };
                         
@@ -217,6 +217,7 @@ unsigned int oBtnStatus = 0;
 void DoLive() {
   boolean       LetRunning = true;
   unsigned long omillis    = 0;  
+  unsigned long amillis    = 0;  
   unsigned int  BtnChange;
 
     
@@ -226,7 +227,11 @@ void DoLive() {
       LetRunning=false;
     }
 
-    BtnStatus=L165ReadOneWord( );
+    if ( millis() - amillis > 10 ) {
+      BtnStatus=L165ReadOneWord( );
+      amillis=millis();
+    }
+    
     if ( BtnStatus != oBtnStatus ) {
       BtnChange= oBtnStatus ^ BtnStatus; // get button changed
       if ( BtnChange > 0 ) {
