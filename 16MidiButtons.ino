@@ -149,7 +149,7 @@ byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 ,
                         127, 127, 127, 127 };
 
 unsigned int Lights     = 0; // Status of lights
-unsigned int Toggle     = 0; // Define which button is in toggle mode
+unsigned int Toggle     = 8; // Define which button is in toggle mode
 
 // ----------------------------------------------------------------------------
 
@@ -236,15 +236,22 @@ void DoLive() {
       BtnChange= oBtnStatus ^ BtnStatus; // get button changed
       if ( BtnChange > 0 ) {
         for (byte i=0;i<16;i++) {
-          unsigned int tmp = BtnChange & ( 1 << i ) ;
-          unsigned int prs = BtnStatus & ( 1 << i ) ;
-          unsigned int tgl = Toggle    & ( 1 << i ) ;
+          unsigned int tmp = BtnChange & ( 1 << i ) ; // Btn change status
+          unsigned int prs = BtnStatus & ( 1 << i ) ; // Btn pressed
+          unsigned int tgl = Toggle    & ( 1 << i ) ; // Toggle mode
           if ( tmp != 0 ) {
-            if ( prs > 0 ) {
+            if ( prs > 0 ) {      // Btn Pressed
               SendButtonPress(i);
-              Lights = Lights ^ prs;  // for testing toggle bit , so first press light , second switch off  
-            } else {
+              if ( tgl > 0 ) {
+                Lights = Lights ^ prs;  // for testing toggle bit , so first press light , second switch off  
+              } else {
+                Lights = Lights | ( 1 << i );
+              }
+            } else {             // Bnt Released 
               SendButtonRelease(i);
+              if ( tgl == 0 ) {
+                Lights = Lights & ~( 1 << i );
+              }
             }
           }
         }
