@@ -53,10 +53,10 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define OLedWidth       128
-#define OLedHight        64
-#define OLedReset        -1
-#define OLedAdr        0x3C
+#define OLedWidth         128
+#define OLedHight          64
+#define OLedReset          -1
+#define OLedAdr          0x3C
 
 Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
 
@@ -67,11 +67,11 @@ Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
 //                            Rotary Encoder & button
 // ----------------------------------------------------------------------------
 
-#define BTN_NONE          0
-#define BTN_ENC           1
-#define BTN_ENC_Long      2
+#define BTN_NONE           0
+#define BTN_ENC            1
+#define BTN_ENC_Long       2
 
-#define BTN_LONGDELAY  1000
+#define BTN_LONGDELAY   1000
 
 byte keydown  =    BTN_NONE;
 byte key      =    BTN_NONE;
@@ -125,7 +125,7 @@ byte readkey() {
 }
 
 // ============================================================================
-//                                       Midi
+//                                     Midi
 // ============================================================================
 
 #define MSGMask        B11110000
@@ -136,8 +136,8 @@ byte readkey() {
 #define MidiProgChange B11000000
 
                         // 16 Butons + 4 Pots
-byte ChnMessage[20] = { B10000000, B10000000, B10000000, B10110000,   B10000000, B10000000, B10000000, B10000000, 
-                        B10000000, B10000000, B10000000, B10000000,   B10000000, B10000000, B10000000, B10000000,                     
+byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10001010, 
+                        B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10001010,                     
                         B10110000, B10110000, B10110000, B10110000  };
                         
 byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51, 
@@ -147,11 +147,19 @@ byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51,
 byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
                         127, 127, 127, 127 ,   127, 127, 127, 127 ,
                         127, 127, 127, 127 };
-
-unsigned int Lights     = 0; // Status of lights
-unsigned int Toggle     = 8; // Define which button is in toggle mode
+                        
+byte ChnData2f[20]  = {   0,   0,   0,   0 ,     0,   0,   0,   0 , 
+                          0,   0,   0,   0 ,     0,   0,   0,   0 ,
+                          0,   0,   0,   0 };
+                        
+unsigned int Lights = 0; // Status of lights
+unsigned int Toggle = 8; // Define which button is in toggle mode
 
 // ----------------------------------------------------------------------------
+// Note On     : 1001 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
+// Note Off    : 1000 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
+// Prg Change  : 1100 cccc  -  0iii iiii  -  0... ....  : c channel 0-16 : i instrument 0-127 : . unused
+// Ctrl Change : 1011 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Controler  0-127 : v value 0-127
 
 void SendMidiCmd(byte Msg,byte Data1,byte Data2 ) {
 }
@@ -174,7 +182,7 @@ void SendButtonRelease(byte Chn ) {
 }
 
 // ============================================================================
-//                            M E N U    &   D I S P L A Y
+//                           M E N U    &    D I S P L A Y
 // ============================================================================
 
 #define L1                0
@@ -240,17 +248,17 @@ void DoLive() {
           unsigned int prs = BtnStatus & ( 1 << i ) ; // Btn pressed
           unsigned int tgl = Toggle    & ( 1 << i ) ; // Toggle mode
           if ( tmp != 0 ) {
-            if ( prs > 0 ) {      // Btn Pressed
+            if ( prs > 0 ) {                  // Btn Pressed
               SendButtonPress(i);
               if ( tgl > 0 ) {
-                Lights = Lights ^ prs;  // for testing toggle bit , so first press light , second switch off  
+                Lights = Lights ^ prs;        // Toggle mode , so first press light , second switch off  
               } else {
-                Lights = Lights | ( 1 << i );
+                Lights = Lights | ( 1 << i ); // Not in toggle mode press switch on light
               }
-            } else {             // Bnt Released 
+            } else {                           // Bnt Released 
               SendButtonRelease(i);
               if ( tgl == 0 ) {
-                Lights = Lights & ~( 1 << i );
+                Lights = Lights & ~( 1 << i ); // Not in toggle mode release switch off light
               }
             }
           }
@@ -371,7 +379,7 @@ void DoDemo() {
     
   while ( LetRunning ) {
     ReadBtnState();
-    if ( readkey() == BTN_ENC ) {  // if Select Pressed exit
+    if ( readkey() == BTN_ENC ) {     // if Select Pressed exit
       LetRunning=false;
     }
 
