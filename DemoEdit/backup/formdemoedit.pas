@@ -6,13 +6,17 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
-  ComCtrls;
+  ComCtrls,DateUtils;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
+    Button3: TButton;
+    Button4: TButton;
     CheckBox1: TCheckBox;
     Label1: TLabel;
     Label2: TLabel;
@@ -35,12 +39,14 @@ type
     Shape13: TShape;
     Shape14: TShape;
     Shape15: TShape;
-    ToggleBox1: TToggleBox;
-    ToggleBox2: TToggleBox;
     TrackBar1: TTrackBar;
 
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure Panel1Click(Sender: TObject);
+    procedure Memo1Change(Sender: TObject);
     procedure Shape00MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     procedure Shape00MouseEnter(Sender: TObject);
@@ -60,13 +66,12 @@ type
     procedure Shape13MouseEnter(Sender: TObject);
     procedure Shape14MouseEnter(Sender: TObject);
     procedure Shape15MouseEnter(Sender: TObject);
-    procedure ToggleBox1Change(Sender: TObject);
-    procedure ToggleBox2Change(Sender: TObject);
 
   private
     SelectedBtn : integer;
     light       : array [0..15 ] of boolean;
     LightN      : Word;
+    run         : Boolean;
 
     Procedure SelectBtn;
     Function  LightToNumber : Word;
@@ -87,6 +92,15 @@ implementation
 {$R *.lfm}
 
 { TForm1 }
+
+procedure RunDelay(millis: int64);
+var
+  StopAt : TDateTime;
+begin
+  StopAt := IncMilliSecond(Now,millis);
+  while (Now < StopAt) and (not Application.Terminated) do
+    Application.ProcessMessages;
+end;
 
 Function  TForm1.LightToNumber : Word;
 var
@@ -239,34 +253,6 @@ begin
   SelectBtn;
 end;
 
-procedure TForm1.ToggleBox1Change(Sender: TObject);
-begin
-  Memo1.Lines.add(IntToStr(LightN));
-end;
-
-procedure TForm1.ToggleBox2Change(Sender: TObject);
-var
-   i   : integer;
-   S   : string;
-   N   : Word;
-   run : Boolean;
-begin
-  run:=true;
-  while run do
-    begin
-      for i:=0 to Memo1.Lines.Count-1 do
-      begin
-        s:=Memo1.Lines[i];
-        N:=StrToInt(s);
-        NumberToLight(N);
-        Sleep(TrackBar1.Position*10);
-        RefreshLight;
-      end;
-      Application.ProcessMessages;
-      run:=checkbox1.Checked;
-    end;
-end;
-
 procedure TForm1.FormCreate(Sender: TObject);
 var
   i : integer;
@@ -293,10 +279,53 @@ begin
 
 end;
 
-procedure TForm1.Panel1Click(Sender: TObject);
+procedure TForm1.Memo1Change(Sender: TObject);
 begin
 
 end;
+
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+  Memo1.Lines.add(IntToStr(LightN));
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+   i   : integer;
+   S   : string;
+   N   : Word;
+
+begin
+  run:=true;
+  while run do
+    begin
+      for i:=0 to Memo1.Lines.Count-1 do if (run ) then
+      begin
+        s:=Memo1.Lines[i];
+        N:=StrToInt(s);
+        NumberToLight(N);
+        RunDelay(TrackBar1.Position*10);
+        RefreshLight;
+        Application.ProcessMessages;
+      end;
+      Application.ProcessMessages;
+      if not(checkbox1.Checked) then run:=false;
+      if Application.Terminated then run:=false;
+    end;
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  run:=false;
+//  checkbox1.Checked:=false;
+end;
+
+procedure TForm1.Button4Click(Sender: TObject);
+begin
+  run:=false;
+  self.Close;
+end;
+
 
 procedure TForm1.Shape00MouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
