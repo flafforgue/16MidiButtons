@@ -1,0 +1,262 @@
+object Form1: TForm1
+  Left = 501
+  Height = 451
+  Top = 147
+  Width = 492
+  Caption = 'Form1'
+  ClientHeight = 451
+  ClientWidth = 492
+  OnCreate = FormCreate
+  LCLVersion = '2.2.6.0'
+  object Panel1: TPanel
+    Left = 16
+    Height = 338
+    Top = 8
+    Width = 336
+    BevelInner = bvRaised
+    BevelOuter = bvLowered
+    ClientHeight = 338
+    ClientWidth = 336
+    TabOrder = 0
+    OnClick = Panel1Click
+    object Shape01: TShape
+      Left = 96
+      Height = 65
+      Top = 16
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape01MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape02: TShape
+      Left = 176
+      Height = 65
+      Top = 16
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape02MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape03: TShape
+      Left = 256
+      Height = 65
+      Top = 16
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape03MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape04: TShape
+      Left = 16
+      Height = 65
+      Top = 96
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape04MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape05: TShape
+      Left = 96
+      Height = 65
+      Top = 96
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape05MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape06: TShape
+      Left = 176
+      Height = 65
+      Top = 96
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape06MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape07: TShape
+      Left = 256
+      Height = 65
+      Top = 96
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape07MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape08: TShape
+      Left = 16
+      Height = 65
+      Top = 176
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape08MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape09: TShape
+      Left = 96
+      Height = 65
+      Top = 176
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape09MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape10: TShape
+      Left = 176
+      Height = 65
+      Top = 176
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape10MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape11: TShape
+      Left = 256
+      Height = 65
+      Top = 176
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape11MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape12: TShape
+      Left = 16
+      Height = 65
+      Top = 256
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape12MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape13: TShape
+      Left = 96
+      Height = 65
+      Top = 256
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape13MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape14: TShape
+      Left = 176
+      Height = 65
+      Top = 256
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape14MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape15: TShape
+      Left = 256
+      Height = 65
+      Top = 256
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape15MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+    object Shape00: TShape
+      Left = 16
+      Height = 65
+      Top = 16
+      Width = 65
+      Brush.Color = clAppWorkspace
+      OnMouseDown = Shape00MouseDown
+      OnMouseEnter = Shape00MouseEnter
+      OnMouseLeave = Shape00MouseLeave
+      Shape = stCircle
+    end
+  end
+  object Memo1: TMemo
+    Left = 16
+    Height = 90
+    Top = 352
+    Width = 336
+    Lines.Strings = (
+      'Memo1'
+    )
+    ScrollBars = ssVertical
+    TabOrder = 1
+  end
+  object Label1: TLabel
+    Left = 368
+    Height = 15
+    Top = 16
+    Width = 34
+    Caption = 'Label1'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 368
+    Height = 15
+    Top = 32
+    Width = 34
+    Caption = 'Label2'
+    ParentColor = False
+  end
+  object ToggleBox1: TToggleBox
+    Left = 376
+    Height = 25
+    Top = 64
+    Width = 75
+    Caption = 'Add'
+    OnChange = ToggleBox1Change
+    TabOrder = 2
+  end
+  object ToggleBox2: TToggleBox
+    Left = 376
+    Height = 25
+    Top = 96
+    Width = 75
+    Caption = 'Play'
+    OnChange = ToggleBox2Change
+    TabOrder = 3
+  end
+  object TrackBar1: TTrackBar
+    Left = 376
+    Height = 176
+    Top = 176
+    Width = 25
+    Max = 50
+    Orientation = trVertical
+    Position = 12
+    TabOrder = 4
+  end
+  object CheckBox1: TCheckBox
+    Left = 376
+    Height = 19
+    Top = 136
+    Width = 47
+    Caption = 'Loop'
+    TabOrder = 5
+  end
+end

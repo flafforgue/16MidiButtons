@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="DemoEdit.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+      </Unit>
+      <Unit>
+        <Filename Value="formdemoedit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="FormDemoEdit"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="247"/>
+        <CursorPos X="35" Y="265"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="29">
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="101" Column="18" TopLine="83"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="264" Column="8" TopLine="232"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="265" Column="8" TopLine="233"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="269" TopLine="237"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="267" Column="31" TopLine="239"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="268" Column="32" TopLine="239"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="264" Column="37" TopLine="239"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="265" Column="37" TopLine="240"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="264" Column="37" TopLine="239"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="271" Column="37" TopLine="246"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="234" Column="3" TopLine="232"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="271" Column="6" TopLine="251"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="278" Column="24" TopLine="61"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="229" Column="19" TopLine="227"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="203" Column="30" TopLine="181"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="229" Column="28" TopLine="227"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="259" Column="21" TopLine="236"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="111" Column="30" TopLine="99"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="70" Column="28" TopLine="56"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="256" Column="18" TopLine="243"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="257" Column="18" TopLine="244"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="256" Column="18" TopLine="243"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="257" Column="18" TopLine="244"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="256" Column="18" TopLine="243"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="257" Column="18" TopLine="244"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="258" Column="18" TopLine="245"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="259" Column="18" TopLine="246"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="274" Column="48" TopLine="68"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="254" Column="3" TopLine="247"/>
+      </Position>
+      <Position>
+        <Filename Value="formdemoedit.pas"/>
+        <Caret Line="275" Column="46" TopLine="250"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

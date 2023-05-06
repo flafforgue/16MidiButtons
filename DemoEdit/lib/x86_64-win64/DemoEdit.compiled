@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="D:\Software\lazarus\fpc\3.2.2\bin\x86_64-win64\fpc.exe" Date="1449427374"/>
+  <Params Value=" -MObjFPC -Scghi -O1 -g -gl -WG -l -vewnhibq -FiD:\GitHub\16MidiButtons\DemoEdit\lib\x86_64-win64 -FuD:\Software\lazarus\lcl\units\x86_64-win64\win32 -FuD:\Software\lazarus\lcl\units\x86_64-win64 -FuD:\Software\lazarus\components\freetype\lib\x86_64-win64 -FuD:\Software\lazarus\components\lazutils\lib\x86_64-win64 -FuD:\Software\lazarus\packager\units\x86_64-win64 -FuD:\GitHub\16MidiButtons\DemoEdit\ -FUD:\GitHub\16MidiButtons\DemoEdit\lib\x86_64-win64\ -FED:\GitHub\16MidiButtons\DemoEdit\ -oD:\GitHub\16MidiButtons\DemoEdit\DemoEdit.exe -dLCL -dLCLwin32 DemoEdit.lpr"/>
+</CONFIG>
