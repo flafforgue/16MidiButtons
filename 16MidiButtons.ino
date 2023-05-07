@@ -2,6 +2,7 @@
 //                      16 Buttons Midi Controler
 // ----------------------------------------------------------------------------
 //
+// V 0.12 add pots and visualization during live 
 // V 0.11 Setup with Control switch mode
 //                   Clrl "Normal" Mode send value when pressing
 //                   CtrS "Switch" Mode first press send High value and switch light On 
@@ -50,6 +51,11 @@
 #define ROT_B               4
 #define BTNEncoder         14
 
+#define Pot0               A3
+#define Pot1               A2
+#define Pot2               A1
+#define Pot3               A0
+
 // ----------------------------------------------------------------------------
 
 #include <Wire.h>
@@ -68,8 +74,65 @@ Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
 #include "Lib_74HC165.h"
 #include "BitsOpperations.h"
 
+// ============================================================================
+//                                     Midi
+// ============================================================================
+
+#define MSGMask        B11110000
+#define CHNMask        B00001111
+
+#define MidiModeNote   B10000000
+#define MidiCtrlChange B10110000
+#define MidiProgChange B11000000
+
+                        // 16 Butons + 4 Pots
+byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10111010, 
+                        B10001010, B10001010, B10001010, B10001010,   B10110001, B10110001, B10110001, B10110001,                     
+                        B10110000, B10110000, B10110000, B10110000  };
+                        
+byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51, 
+                         36,  38,  44,  46,     01,  02,  03,  04,
+                          7,   1,  12,  13 }; 
+
+byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
+                        127, 127, 127, 127 ,   127, 127, 127, 127 ,
+                          0,   0,   0,   0 };
+                        
+byte ChnData2f[20]  = {   0,   0,   0,   0 ,     0,   0,   0,   0 , 
+                          0,   0,   0,   0 ,     0,   0,   0,   0 ,
+                          0,   0,   0,   0 };
+                        
+unsigned int Lights =      0; // Status of lights
+unsigned int Toggle = 0x8888; // Define which button is in toggle mode
+
 // ----------------------------------------------------------------------------
-//                            Rotary Encoder & button
+// Note On     : 1001 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
+// Note Off    : 1000 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
+// Prg Change  : 1100 cccc  -  0iii iiii  -  0... ....  : c channel 0-16 : i instrument 0-127 : . unused
+// Ctrl Change : 1011 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Controler  0-127 : v value 0-127
+
+void SendMidiCmd(byte Msg,byte Data1,byte Data2 ) {
+}
+
+void SendButtonPress(byte Chn ) {
+  byte Msg;
+
+  Msg=ChnMessage[Chn];
+  SendMidiCmd(Msg, ChnData1[Chn], ChnData2[Chn] ); 
+}
+
+void SendButtonRelease(byte Chn ) {
+  byte Msg;
+
+  Msg=ChnMessage[Chn];
+  if (( Msg & MSGMask ) == MidiModeNote ) {
+     Msg = Msg & B11101111; 
+  }
+  SendMidiCmd(Msg, ChnData1[Chn], ChnData2[Chn] ); 
+}
+
+// ----------------------------------------------------------------------------
+//                         Rotary Encoder , button & Pots
 // ----------------------------------------------------------------------------
 
 #define BTN_NONE           0
@@ -82,9 +145,10 @@ byte keydown  =    BTN_NONE;
 byte key      =    BTN_NONE;
 unsigned long      BTNTime;
 
-int  encodermov = 0;
+int  encodermov     = 0;
+byte LastBtnPressed = 0;
 
-#define ENCSOFTFILTER
+//#define ENCSOFTFILTER
 #define ENCSOFTFILTERDELAY 25
 
 #ifdef ENCSOFTFILTER
@@ -116,6 +180,27 @@ void ClearEncoder() {
   encodermov=0;
   sei(); 
 }
+
+// ----------------------------------------------------------------------------
+
+#define ROUNDPOTS 0  //
+#define DIVPOTS   8  // Analogread 0-1023 - values 0-127 
+
+void ReadPots() {
+  ChnData2[16]=( analogRead(Pot0) + ROUNDPOTS ) / DIVPOTS;
+  ChnData2[17]=( analogRead(Pot1) + ROUNDPOTS ) / DIVPOTS;
+  ChnData2[18]=( analogRead(Pot2) + ROUNDPOTS ) / DIVPOTS;
+  ChnData2[19]=( analogRead(Pot3) + ROUNDPOTS ) / DIVPOTS;
+
+  for (byte i=16; i<20;i++) {
+    if ( ChnData2f[i] != ChnData2[i] ) { 
+      ChnData2f[i]=ChnData2[i];
+      LastBtnPressed=i;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------------
 
 void ReadBtnState() {
   unsigned long NTime; 
@@ -153,63 +238,6 @@ void MyDelay(unsigned int del) {
   while ( millis()-ot < del ) {
     ReadBtnState();
   } 
-}
-
-// ============================================================================
-//                                     Midi
-// ============================================================================
-
-#define MSGMask        B11110000
-#define CHNMask        B00001111
-
-#define MidiModeNote   B10000000
-#define MidiCtrlChange B10110000
-#define MidiProgChange B11000000
-
-                        // 16 Butons + 4 Pots
-byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10111010, 
-                        B10001010, B10001010, B10001010, B10001010,   B10110001, B10110001, B10110001, B10110001,                     
-                        B10110000, B10110000, B10110000, B10110000  };
-                        
-byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51, 
-                         36,  38,  44,  46,     01,  02,  03,  04,
-                          7,   1,  12,  13 }; 
-
-byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
-                        127, 127, 127, 127 ,   127, 127, 127, 127 ,
-                        127, 127, 127, 127 };
-                        
-byte ChnData2f[20]  = {   0,   0,   0,   0 ,     0,   0,   0,   0 , 
-                          0,   0,   0,   0 ,     0,   0,   0,   0 ,
-                          0,   0,   0,   0 };
-                        
-unsigned int Lights =      0; // Status of lights
-unsigned int Toggle = 0x8888; // Define which button is in toggle mode
-
-// ----------------------------------------------------------------------------
-// Note On     : 1001 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
-// Note Off    : 1000 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
-// Prg Change  : 1100 cccc  -  0iii iiii  -  0... ....  : c channel 0-16 : i instrument 0-127 : . unused
-// Ctrl Change : 1011 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Controler  0-127 : v value 0-127
-
-void SendMidiCmd(byte Msg,byte Data1,byte Data2 ) {
-}
-
-void SendButtonPress(byte Chn ) {
-  byte Msg;
-
-  Msg=ChnMessage[Chn];
-  SendMidiCmd(Msg, ChnData1[Chn], ChnData2[Chn] ); 
-}
-
-void SendButtonRelease(byte Chn ) {
-  byte Msg;
-
-  Msg=ChnMessage[Chn];
-  if (( Msg & MSGMask ) == MidiModeNote ) {
-     Msg = Msg & B11101111; 
-  }
-  SendMidiCmd(Msg, ChnData1[Chn], ChnData2[Chn] ); 
 }
 
 // ============================================================================
@@ -253,6 +281,7 @@ void DoLive() {
   boolean       LetRunning = true;
   unsigned long omillis    = 0;  
   unsigned long amillis    = 0;  
+  unsigned long zmillis    = 0; 
   unsigned int  BtnChange;
 
   while ( LetRunning ) {
@@ -261,11 +290,11 @@ void DoLive() {
       LetRunning=false;
     }
 
-    if ( millis() - amillis > 10 ) {
+    if ( millis() - amillis > 5 ) {
       BtnStatus=L165ReadOneWord( );
       amillis=millis();
     }
-    
+
     if ( BtnStatus != oBtnStatus ) {
       BtnChange= oBtnStatus ^ BtnStatus; // get button changed
       if ( BtnChange > 0 ) {
@@ -275,6 +304,7 @@ void DoLive() {
           unsigned int tgl = Toggle    & ( 1 << i ) ; // Toggle mode
           if ( tmp != 0 ) {
             if ( prs > 0 ) {                  // Btn Pressed
+              LastBtnPressed=i;
               SendButtonPress(i);
               if ( tgl > 0 ) {
                 Lights = Lights ^ prs;        // Toggle mode , so first press light , second switch off  
@@ -293,9 +323,43 @@ void DoLive() {
       L595SendOneWord(Lights);
       oBtnStatus=BtnStatus;
     }
-    
-    if ( millis() - omillis > 150 ) { // Refresh Display every 150 us
+   
+     if ( millis() - zmillis > 250 ) {     // Refresh pots every 250 us
+      zmillis = millis();
+      ChnData2[16]=( analogRead(Pot0) + ROUNDPOTS ) / DIVPOTS;
+      ChnData2[17]=( analogRead(Pot1) + ROUNDPOTS ) / DIVPOTS;
+      ChnData2[18]=( analogRead(Pot2) + ROUNDPOTS ) / DIVPOTS;
+      ChnData2[19]=( analogRead(Pot3) + ROUNDPOTS ) / DIVPOTS;
+      for (byte i=16; i<20;i++) {
+        if ( ChnData2f[i] != ChnData2[i] ) { 
+          ChnData2f[i]=ChnData2[i];
+          SendButtonPress(i);
+          LastBtnPressed=i;
+        }
+      }      
+    }
+       
+    if ( millis() - omillis > 300 ) {    // Refresh Display every 300 us
       TitleMenu(F("Live"));
+      OLed.setCursor( 4, L2);  OLed.print(F("Chanl")); 
+      OLed.setCursor(68, L2);  OLedprint4(ChnMessage[LastBtnPressed] & CHNMask);
+      OLed.setCursor(68, L3);  OLedprint4(ChnData1[LastBtnPressed]);
+      OLed.setCursor(68, L4);  OLedprint4(ChnData2[LastBtnPressed]);
+      
+      switch ( ChnMessage[LastBtnPressed] & MSGMask ) {
+        case MidiModeNote  :
+             OLed.setCursor( 4, L3);  OLed.print(F("Note"));            
+             OLed.setCursor( 4, L4);  OLed.print(F("Vel"));             
+             break;
+        case MidiCtrlChange:            
+             OLed.setCursor( 4, L3);  OLed.print(F("Ctrl"));          
+             OLed.setCursor( 4, L4);  OLed.print(F("Val"));                         
+             break;  
+        case MidiProgChange:
+             OLed.setCursor( 4, L3);  OLed.print(F("Prog"));          
+             break;
+      }
+
       OLed.display();
       omillis = millis();
     }
@@ -307,8 +371,6 @@ void DoLive() {
 // ----------------------------------------------------------------------------
 //                                   S E T U P
 // ----------------------------------------------------------------------------
-
-byte LastBtnPressed = 0;
 
 void DoConfig() {
   boolean       LetRunning = true;
@@ -328,6 +390,10 @@ void DoConfig() {
          break;     
     }
 
+    ReadPots();
+    if ( LastBtnPressed>15) {
+      L595SendOneWord(0);
+    }
     BtnStatus=L165ReadOneWord( );
     if ( BtnStatus != oBtnStatus ) {
       oBtnStatus=BtnStatus;
@@ -345,25 +411,29 @@ void DoConfig() {
             ChnMessage[LastBtnPressed] = ( ChnMessage[LastBtnPressed] & MSGMask ) | ((( ChnMessage[LastBtnPressed] & CHNMask ) + encodermov) & CHNMask );
             break;    
          case 1:  // change Mode
-            msg = ( ChnMessage[LastBtnPressed] & MSGMask );
-            if ( msg == MidiModeNote ) { msg = MidiCtrlChange;  }
-            else if ( msg == MidiProgChange ) { msg = MidiModeNote;  }
-            else {
-              if ( (unsigned int)(Toggle & ( (unsigned int)( 1 << LastBtnPressed ) )) > 0 ) {
-                msg = MidiProgChange;
-                Toggle = Toggle & ( ~ (unsigned int)( 1 << LastBtnPressed ) ); 
-              } else {
-                Toggle = Toggle | ( (unsigned int)( 1 << LastBtnPressed ) );
-                msg = MidiCtrlChange;
+            if ( BtnStatus < 16 ) {
+              msg = ( ChnMessage[LastBtnPressed] & MSGMask );
+              if ( msg == MidiModeNote ) { msg = MidiCtrlChange;  }
+              else if ( msg == MidiProgChange ) { msg = MidiModeNote;  }
+              else {
+                if ( (unsigned int)(Toggle & ( (unsigned int)( 1 << LastBtnPressed ) )) > 0 ) {
+                  msg = MidiProgChange;
+                  Toggle = Toggle & ( ~ (unsigned int)( 1 << LastBtnPressed ) ); 
+                } else {
+                  Toggle = Toggle | ( (unsigned int)( 1 << LastBtnPressed ) );
+                  msg = MidiCtrlChange;
+                }
               }
+              ChnMessage[LastBtnPressed] = msg | ( ChnMessage[LastBtnPressed] & CHNMask );
             }
-            ChnMessage[LastBtnPressed] = msg | ( ChnMessage[LastBtnPressed] & CHNMask );
             break;               
          case 2:  // change channel
             ChnData1[LastBtnPressed] = ( ChnData1[LastBtnPressed] + encodermov ) & B01111111;
             break; 
          case 3:  // change data2
-            ChnData2[LastBtnPressed] = ( ChnData2[LastBtnPressed] + encodermov ) & B01111111;
+            if ( BtnStatus < 16 ) {
+              ChnData2[LastBtnPressed] = ( ChnData2[LastBtnPressed] + encodermov ) & B01111111;
+            }
             break;                
          case 4:  // change data2f ( min value )
             ChnData2f[LastBtnPressed] = ( ChnData2f[LastBtnPressed] + encodermov ) & B01111111;
@@ -425,6 +495,7 @@ void DoConfig() {
     }
   }
 
+  L595SendOneWord(0);
   ClearEncoder();  
 }
 
