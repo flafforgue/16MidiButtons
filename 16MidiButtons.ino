@@ -86,12 +86,12 @@ Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
 #define MidiProgChange B11000000
 
                         // 16 Butons + 4 Pots
-byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10111010, 
-                        B10001010, B10001010, B10001010, B10001010,   B10110001, B10110001, B10110001, B10110001,                     
+byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10001010, 
+                        B10001010, B10001010, B10001010, B10001010,   B10000001, B10000001, B10000001, B10000001,                     
                         B10110000, B10110000, B10110000, B10110000  };
                         
-byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51, 
-                         36,  38,  44,  46,     01,  02,  03,  04,
+byte ChnData1[20]   = {  57,  69,  81,  93,     36,  38,  44,  46,     
+                         48,  50,  49,  51,     41,  43,  45,  47,     
                           7,   1,  12,  13 }; 
 
 byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
@@ -103,7 +103,7 @@ byte ChnData2f[20]  = {   0,   0,   0,   0 ,     0,   0,   0,   0 ,
                           0,   0,   0,   0 };
                         
 unsigned int Lights =      0; // Status of lights
-unsigned int Toggle = 0x8888; // Define which button is in toggle mode
+unsigned int Toggle = 0x0000; // Define which button is in toggle mode
 
 // ----------------------------------------------------------------------------
 // Note On     : 1001 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
@@ -238,6 +238,39 @@ void MyDelay(unsigned int del) {
   while ( millis()-ot < del ) {
     ReadBtnState();
   } 
+}
+
+// =============================================================
+//                    eeprom Recal and Save 
+// =============================================================
+
+#define PROGSTAMP 3519
+
+#define Adr_Stamp     0
+#define Adr_Msg       2
+#define Adr_Data1    42
+#define Adr_Data2    82
+#define Adr_Data2f  122
+
+void SaveToEprom() {
+  EEPROM.put(Adr_Stamp, (int) PROGSTAMP);
+  EEPROM.put(Adr_Msg   ,ChnMessage );                     
+  EEPROM.put(Adr_Data1 ,ChnData1   );
+  EEPROM.put(Adr_Data2 ,ChnData2   );                     
+  EEPROM.put(Adr_Data2f,ChnData2f  );
+}
+
+void InitFromEprom () {
+  int temp;
+  EEPROM.get(Adr_Stamp, temp);
+  if ( temp == (int) PROGSTAMP ) {       // Stamp found , we can assume eerom contain Valid Datas 
+    EEPROM.get(Adr_Msg   ,ChnMessage );                     
+    EEPROM.get(Adr_Data1 ,ChnData1   );
+    EEPROM.get(Adr_Data2 ,ChnData2   );                     
+    EEPROM.get(Adr_Data2f,ChnData2f  );
+  } else {                    // Stamp not found , Values need to be initialized
+    SaveToEprom(); 
+  }
 }
 
 // ============================================================================
