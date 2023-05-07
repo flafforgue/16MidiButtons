@@ -2,6 +2,10 @@
 //                      16 Buttons Midi Controler
 // ----------------------------------------------------------------------------
 //
+// V 0.11 Setup with Control switch mode
+//                   Clrl "Normal" Mode send value when pressing
+//                   CtrS "Switch" Mode first press send High value and switch light On 
+//                                      second send Low value and Switch light Off
 // V 0.10 setup
 // V 0.06 Test menus       - ok
 // V 0.05 test Encoder     - ok
