@@ -62,6 +62,7 @@ Adafruit_SSD1306 OLed(OLedWidth, OLedHight, &Wire, OLedReset);
 
 #include "Lib_74HC595.h"
 #include "Lib_74HC165.h"
+#include "BitsOpperations.h"
 
 // ----------------------------------------------------------------------------
 //                            Rotary Encoder & button
@@ -143,6 +144,13 @@ byte readkey() {
   return( tmp);
 }
 
+void MyDelay(unsigned int del) {
+  unsigned long ot = millis();
+  while ( millis()-ot < del ) {
+    ReadBtnState();
+  } 
+}
+
 // ============================================================================
 //                                     Midi
 // ============================================================================
@@ -155,12 +163,12 @@ byte readkey() {
 #define MidiProgChange B11000000
 
                         // 16 Butons + 4 Pots
-byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10001010, 
-                        B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10001010,                     
+byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010, B10001010, B10001010, B10111010, 
+                        B10001010, B10001010, B10001010, B10001010,   B10110001, B10110001, B10110001, B10110001,                     
                         B10110000, B10110000, B10110000, B10110000  };
                         
 byte ChnData1[20]   = {  41,  43,  45,  47,     48,  50,  49,  51, 
-                         41,  43,  45,  47,     36,  38,  44,  46,
+                         36,  38,  44,  46,     01,  02,  03,  04,
                           7,   1,  12,  13 }; 
 
 byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
@@ -171,8 +179,8 @@ byte ChnData2f[20]  = {   0,   0,   0,   0 ,     0,   0,   0,   0 ,
                           0,   0,   0,   0 ,     0,   0,   0,   0 ,
                           0,   0,   0,   0 };
                         
-unsigned int Lights = 0; // Status of lights
-unsigned int Toggle = 8; // Define which button is in toggle mode
+unsigned int Lights =      0; // Status of lights
+unsigned int Toggle = 0x8888; // Define which button is in toggle mode
 
 // ----------------------------------------------------------------------------
 // Note On     : 1001 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
@@ -234,10 +242,6 @@ void OLedprint4 ( int value ) {
 //                                    Mode Live
 // ============================================================================
 
-void ToggleBit(unsigned int *var, unsigned int mask) {
-  *var = *var ^ mask;
-}
-
 unsigned int BtnStatus  = 1;
 unsigned int oBtnStatus = 0;
 
@@ -247,7 +251,6 @@ void DoLive() {
   unsigned long amillis    = 0;  
   unsigned int  BtnChange;
 
-    
   while ( LetRunning ) {
     ReadBtnState();
     if ( readkey() == BTN_ENC ) {  // if Select Pressed exit
@@ -306,7 +309,8 @@ byte LastBtnPressed = 0;
 void DoConfig() {
   boolean       LetRunning = true;
   unsigned long omillis    = 0;  
-  byte Edt = 0;
+  byte          Edt        = 0;
+  unsigned int  msg;
   
   while ( LetRunning ) {
     ReadBtnState();
@@ -326,23 +330,39 @@ void DoConfig() {
       for (byte i=0;i<16;i++)  {
         if ( ( BtnStatus >> i ) & 1 == 1 ) {
           LastBtnPressed=i; 
+          L595SendOneWord(BtnStatus);
         }
       }
     }
   
     if (encodermov != 0 ) {
       switch ( Edt ) {
-         case 0: 
+         case 0:  // Channel number
             ChnMessage[LastBtnPressed] = ( ChnMessage[LastBtnPressed] & MSGMask ) | ((( ChnMessage[LastBtnPressed] & CHNMask ) + encodermov) & CHNMask );
-            break;     
-         case 1: 
-         
+            break;    
+         case 1:  // change Mode
+            msg = ( ChnMessage[LastBtnPressed] & MSGMask );
+            if ( msg == MidiModeNote ) { msg = MidiCtrlChange;  }
+            else if ( msg == MidiProgChange ) { msg = MidiModeNote;  }
+            else {
+              if ( (unsigned int)(Toggle & ( (unsigned int)( 1 << LastBtnPressed ) )) > 0 ) {
+                msg = MidiProgChange;
+                Toggle = Toggle & ( ~ (unsigned int)( 1 << LastBtnPressed ) ); 
+              } else {
+                Toggle = Toggle | ( (unsigned int)( 1 << LastBtnPressed ) );
+                msg = MidiCtrlChange;
+              }
+            }
+            ChnMessage[LastBtnPressed] = msg | ( ChnMessage[LastBtnPressed] & CHNMask );
             break;               
-         case 2: 
+         case 2:  // change channel
             ChnData1[LastBtnPressed] = ( ChnData1[LastBtnPressed] + encodermov ) & B01111111;
             break; 
-         case 3: 
+         case 3:  // change data2
             ChnData2[LastBtnPressed] = ( ChnData2[LastBtnPressed] + encodermov ) & B01111111;
+            break;                
+         case 4:  // change data2f ( min value )
+            ChnData2f[LastBtnPressed] = ( ChnData2f[LastBtnPressed] + encodermov ) & B01111111;
             break;                
       }
       cli();
@@ -354,14 +374,16 @@ void DoConfig() {
       TitleMenu(F("Bt "));  
 
       switch(Edt) {
-        case 0 : OLed.fillRect(64, L1,  63, 16, SSD1306_WHITE);
+        case 0 : OLed.fillRect(64, L1,  63, 16, SSD1306_WHITE); // Channel
                  break;
-        case 1 : OLed.fillRect( 0, L2,  63, 16, SSD1306_WHITE);
+        case 1 : OLed.fillRect( 0, L2,  63, 16, SSD1306_WHITE); // Mode
                  break;         
-        case 2 : OLed.fillRect(64, L2,  63, 16, SSD1306_WHITE);
+        case 2 : OLed.fillRect(64, L2,  63, 16, SSD1306_WHITE); // Note
                  break;         
-        case 3 : OLed.fillRect( 0, L3, 127, 16, SSD1306_WHITE);
-                 break;         
+        case 3 : OLed.fillRect(64, L3,  63, 16, SSD1306_WHITE); // Value / Value on
+                 break;        
+        case 4 : OLed.fillRect( 0, L3,  63, 16, SSD1306_WHITE); // Value off 
+                 break;                     
       }                       
       OLed.setTextColor(SSD1306_INVERSE);
       
@@ -369,6 +391,7 @@ void DoConfig() {
       OLed.setCursor(68, L1);OLed.print(F("Ch "));  OLedprint2(ChnMessage[LastBtnPressed] & CHNMask);
       
 //      OLed.setCursor(68, L2); OLedprint2( ChnMessage[LastBtnPressed] & CHNMask );  // chn
+//      unsigned int Tg = ( Toggle    & ( 1 << LastBtnPressed ) );
       switch ( ChnMessage[LastBtnPressed] & MSGMask ) {
         case MidiModeNote  :
              OLed.setCursor( 4, L2);  OLed.print(F("Note"));
@@ -376,12 +399,17 @@ void DoConfig() {
              OLed.setCursor( 4, L3);  OLed.print(F("Vel"));
              OLed.setCursor(68, L3);  OLedprint4(ChnData2[LastBtnPressed]);
              break;
-        case MidiCtrlChange:
-             OLed.setCursor( 4, L2);  OLed.print(F("Ctrl"));
-             OLed.setCursor(68, L2);  OLedprint4(ChnData1[LastBtnPressed]);
-             OLed.setCursor( 4, L3);  OLed.print(F("Val"));
+        case MidiCtrlChange:            
+             OLed.setCursor(68, L2);  OLedprint4(ChnData1[LastBtnPressed]);       
              OLed.setCursor(68, L3);  OLedprint4(ChnData2[LastBtnPressed]);
-             break;
+             if ( (unsigned int)(Toggle & ( (unsigned int)( 1 << LastBtnPressed ) )) > 0 ) {
+               OLed.setCursor( 4, L2);  OLed.print(F("CtrS"));
+               OLed.setCursor( 4, L3);  OLed.print(ChnData2f[LastBtnPressed]);
+             } else {
+               OLed.setCursor( 4, L2);  OLed.print(F("Ctrl"));            
+               OLed.setCursor( 4, L3);  OLed.print(F("Val"));
+             }             
+             break;  
         case MidiProgChange:
              OLed.setCursor( 4, L2);  OLed.print(F("Prog"));
              OLed.setCursor(68, L2);  OLedprint4(ChnData1[LastBtnPressed]);          
@@ -412,7 +440,7 @@ void PlayPatern(byte NbSteps, unsigned int Tab[] ) {
   for (byte i=0;i<NbSteps;i++)  {
     L595SendOneWord(Tab[i]);
     ReadBtnState();
-    delay(Tempo);
+    MyDelay(Tempo);
   }
 }
 
@@ -434,7 +462,6 @@ void DoDemo() {
       omillis = millis();
     }
   }
-
   ClearEncoder();  
 }
 
