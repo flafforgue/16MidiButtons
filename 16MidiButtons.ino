@@ -79,11 +79,17 @@ unsigned long      BTNTime;
 
 int  encodermov = 0;
 
+unsigned long OEncTime = 0; 
+
 void doEncoder() {
-  if (digitalRead(ROT_A) == digitalRead(ROT_B)) {
-    encodermov = +1;
-  } else {
-    encodermov = -1;
+  unsigned long Nt = millis();
+  if ( Nt - OEncTime > 7 ) {
+    if (digitalRead(ROT_A) == digitalRead(ROT_B)) {
+      encodermov = +1;
+    } else {
+      encodermov = -1;
+    } 
+    OEncTime=Nt;   
   }
 }
 
@@ -372,7 +378,23 @@ void DoConfig() {
 // ----------------------------------------------------------------------------
 //                                     D E M O
 // ----------------------------------------------------------------------------
-               
+
+int Tempo = 150;
+
+#define NbDemo 13
+ unsigned int TabDemo[NbDemo] = {     0,    15,   240,  3840,
+                                  61440,     0, 61440, 65280,
+                                  65520, 65535, 28662,  1632,
+                                      0 };
+
+void PlayPatern(byte NbSteps, unsigned int Tab[] ) {
+  for (byte i=0;i<NbSteps;i++)  {
+    L595SendOneWord(Tab[i]);
+    ReadBtnState();
+    delay(Tempo);
+  }
+}
+
 void DoDemo() {
   boolean       LetRunning = true;
   unsigned long omillis    = 0;  
@@ -382,6 +404,8 @@ void DoDemo() {
     if ( readkey() == BTN_ENC ) {     // if Select Pressed exit
       LetRunning=false;
     }
+
+    PlayPatern(NbDemo,TabDemo);
 
     if ( millis() - omillis > 150 ) { // Refresh Display every 150 us
       TitleMenu(F("Demo"));
@@ -416,7 +440,9 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(ROT_A), doEncoder, CHANGE ); 
   
-  delay(2000);  
+  delay(1000);  
+  PlayPatern(NbDemo,TabDemo);
+  delay(1000);
   ClearEncoder();  
 }
 
