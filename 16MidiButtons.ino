@@ -79,11 +79,15 @@ unsigned long      BTNTime;
 
 int  encodermov = 0;
 
+#define ENCSOFTFILTER
+#define ENCSOFTFILTERDELAY 25
+
+#ifdef ENCSOFTFILTER
 unsigned long OEncTime = 0; 
 
 void doEncoder() {
   unsigned long Nt = millis();
-  if ( Nt - OEncTime > 7 ) {
+  if ( Nt - OEncTime > ENCSOFTFILTERDELAY ) {
     if (digitalRead(ROT_A) == digitalRead(ROT_B)) {
       encodermov = +1;
     } else {
@@ -92,6 +96,15 @@ void doEncoder() {
     OEncTime=Nt;   
   }
 }
+#else
+void doEncoder() {
+  if (digitalRead(ROT_A) == digitalRead(ROT_B)) {
+    encodermov = +1;
+  } else {
+    encodermov = -1;
+  } 
+}
+#endif
 
 void ClearEncoder() {
   cli();
@@ -300,7 +313,7 @@ void DoConfig() {
     switch ( readkey() ) {
       case BTN_ENC:  
          Edt++;
-         if ( Edt > 2) { Edt=0; }
+         if ( Edt > 3) { Edt=0; }
          break; 
       case BTN_ENC_Long:   
          LetRunning=false;
@@ -321,11 +334,14 @@ void DoConfig() {
       switch ( Edt ) {
          case 0: 
             ChnMessage[LastBtnPressed] = ( ChnMessage[LastBtnPressed] & MSGMask ) | ((( ChnMessage[LastBtnPressed] & CHNMask ) + encodermov) & CHNMask );
-            break;       
+            break;     
          case 1: 
+         
+            break;               
+         case 2: 
             ChnData1[LastBtnPressed] = ( ChnData1[LastBtnPressed] + encodermov ) & B01111111;
             break; 
-         case 2: 
+         case 3: 
             ChnData2[LastBtnPressed] = ( ChnData2[LastBtnPressed] + encodermov ) & B01111111;
             break;                
       }
@@ -337,11 +353,16 @@ void DoConfig() {
     if ( millis() - omillis > 150 ) { // Refresh Display every 150 us
       TitleMenu(F("Bt "));  
 
-      if ( Edt==0 ) {
-        OLed.fillRect(64,Edt*16, 127, 16, SSD1306_WHITE);  
-      } else {
-        OLed.fillRect( 0,Edt*16, 127, 16, SSD1306_WHITE); 
-      }          
+      switch(Edt) {
+        case 0 : OLed.fillRect(64, L1,  63, 16, SSD1306_WHITE);
+                 break;
+        case 1 : OLed.fillRect( 0, L2,  63, 16, SSD1306_WHITE);
+                 break;         
+        case 2 : OLed.fillRect(64, L2,  63, 16, SSD1306_WHITE);
+                 break;         
+        case 3 : OLed.fillRect( 0, L3, 127, 16, SSD1306_WHITE);
+                 break;         
+      }                       
       OLed.setTextColor(SSD1306_INVERSE);
       
       OLed.setCursor(36, L1);OLedprint2(LastBtnPressed);
