@@ -31,10 +31,10 @@
 // D14          MISO      RotBTN
 // D15          SCLK
 // D16          MOSI
-// D18  A0                Pot0 
-// D19  A1                Pot1
-// D20  A2                Pot2
-// D21  A3                Pot3
+// D18  A0                Pot3 
+// D19  A1                Pot2
+// D20  A2                Pot1
+// D21  A3                Pot0
 
 #define CLK595             10
 #define LATCH595            9
