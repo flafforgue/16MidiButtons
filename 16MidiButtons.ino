@@ -90,8 +90,8 @@ byte ChnMessage[20] = { B10001010, B10001010, B10001010, B10001010,   B10001010,
                         B10001010, B10001010, B10001010, B10001010,   B10000001, B10000001, B10000001, B10000001,                     
                         B10110000, B10110000, B10110000, B10110000  };
                         
-byte ChnData1[20]   = {  57,  69,  81,  93,     36,  38,  44,  46,     
-                         48,  50,  49,  51,     41,  43,  45,  47,     
+byte ChnData1[20]   = {  51,  49,  57,  55,     41,  43,  45,  44,     
+                         47,  48,  50,  46,     36,  38,  37,  42,     
                           7,   1,  12,  13 }; 
 
 byte ChnData2[20]   = { 127, 127, 127, 127 ,   127, 127, 127, 127 , 
@@ -110,6 +110,33 @@ unsigned int Toggle = 0x0000; // Define which button is in toggle mode
 // Note Off    : 1000 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Note 0-127       : v Velocity 0-127
 // Prg Change  : 1100 cccc  -  0iii iiii  -  0... ....  : c channel 0-16 : i instrument 0-127 : . unused
 // Ctrl Change : 1011 cccc  -  0nnn nnnn  -  0vvv vvvv  : c channel 0-16 : n Controler  0-127 : v value 0-127
+
+// DRUM Kit
+// 36  -  Bass Drum 1
+// 38  -  Acoustic Snare
+// 37  -  Side Stick
+// 42  -  Closed Hi-Hat
+//
+// 47  -  Low-Mid Tom
+// 48  -  Hi-Mid Tom
+// 50  -  High Tom
+// 46  -  Open Hi-Hat
+//
+// 41  -  Low Floor Tom
+// 43  -  High Floor Tom
+// 45  -  Low Tom
+// 44  -  Pedal Hi-Hat
+//
+// 51  -  Ride Cymbal 1
+// 49  -  Crash Cymbal 1
+// 57  -  Crash Symbol 2
+// 55  -  Splash Cymbal
+//
+// 35  -  Acoustic Bass Drum
+// 40  -  Electric Snare
+// 39  -  Hand Clap
+// 60  -  Hi Bongo
+// 61  -  Low Bongo
 
 void SendMidiCmd(byte Msg,byte Data1,byte Data2 ) {
 }
