@@ -1,6 +1,8 @@
 // ----------------------------------------------------------------------------
 //                      16 Buttons Midi Controler
 // ----------------------------------------------------------------------------
+// Arduino Micro 32U4
+//
 //
 // V 0.12 add pots and visualization during live 
 // V 0.11 Setup with Control switch mode
@@ -152,7 +154,7 @@ void SendButtonRelease(byte Chn ) {
   byte Msg;
 
   Msg=ChnMessage[Chn];
-  if (( Msg & MSGMask ) == MidiModeNote ) {
+  if (( Msg & MSGMask ) == MidiModeNote ) {  // Send Note Off
      Msg = Msg & B11101111; 
   }
   SendMidiCmd(Msg, ChnData1[Chn], ChnData2[Chn] ); 
@@ -363,13 +365,13 @@ void DoLive() {
           unsigned int prs = BtnStatus & ( 1 << i ) ; // Btn pressed
           unsigned int tgl = Toggle    & ( 1 << i ) ; // Toggle mode
           if ( tmp != 0 ) {
-            if ( prs > 0 ) {                  // Btn Pressed
+            if ( prs > 0 ) {                   // Btn Pressed
               LastBtnPressed=i;
               SendButtonPress(i);
               if ( tgl > 0 ) {
-                Lights = Lights ^ prs;        // Toggle mode , so first press light , second switch off  
+                Lights = Lights ^ prs;         // Toggle mode , so first press light , second switch off  
               } else {
-                Lights = Lights | ( 1 << i ); // Not in toggle mode press switch on light
+                Lights = Lights | ( 1 << i );  // Not in toggle mode press switch on light
               }
             } else {                           // Bnt Released 
               SendButtonRelease(i);
@@ -536,7 +538,7 @@ void DoConfig() {
         case MidiCtrlChange:            
              OLed.setCursor(68, L2);  OLedprint4(ChnData1[LastBtnPressed]);       
              OLed.setCursor(68, L3);  OLedprint4(ChnData2[LastBtnPressed]);
-             if ( (unsigned int)(Toggle & ( (unsigned int)( 1 << LastBtnPressed ) )) > 0 ) {
+             if ( (unsigned int)(Toggle & ( (unsigned int)( 1 << LastBtnPressed ) )) > 0 ) { 
                OLed.setCursor( 4, L2);  OLed.print(F("CtrS"));
                OLed.setCursor( 4, L3);  OLed.print(ChnData2f[LastBtnPressed]);
              } else {
